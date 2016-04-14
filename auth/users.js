@@ -1,6 +1,6 @@
 var records = [
-    { id: 1, username: 'tim', password: 'ilovemaddy', displayName: 'Tim', emails: [ { value: 'tim.carlson@gmail.com' } ] }
-  , { id: 2, username: 'maddy', password: 'ilovetim', displayName: 'Maddy', emails: [ { value: 'mkundel91@gmail.com' } ] }
+    { id: 1, username: 'tim', password: 'ilovemaddy', displayName: 'Tim', icon: 'timicon.png', emails: [ { value: 'tim.carlson@gmail.com' } ] }
+  , { id: 2, username: 'maddy', password: 'ilovetim', displayName: 'Maddy', icon: 'maddyicon.png', emails: [ { value: 'mkundel91@gmail.com' } ] }
 ];
 
 exports.findById = function(id, cb) {
