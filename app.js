@@ -62,6 +62,12 @@ const ChatMessage = mongoose.model('ChatMessage', {
   message: String
 });
 
+const Todo = mongoose.model('Todo', {
+  timestamp: Date,
+  message: String,
+  completed: Boolean
+});
+
 const app = express();
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
@@ -216,10 +222,54 @@ app.post('/addComment', require('connect-ensure-login').ensureLoggedIn(), functi
   });
 });
 
+app.post('/addTodo', require('connect-ensure-login').ensureLoggedIn(), function(req, res) {
+  var todo = new Todo({timestamp: new Date(), completed: false, message: req.body.message});
+  todo.save(function(err) {
+    if (err)
+      res.send(500);
+    else
+      res.send(200);
+  });
+});
+
+app.get('/todos', require('connect-ensure-login').ensureLoggedIn(), function(req, res) {
+  Todo.find({}).sort({timestamp: -1}).exec(function(err, todos) {
+    if (err) return console.error(err);
+    res.json({"todos": todos});
+  });
+});
+
 app.get('/chatMessages', require('connect-ensure-login').ensureLoggedIn(), function(req, res) {
   ChatMessage.find({}).sort({timestamp: -1}).limit(25).exec(function(err, messages) {
     if (err) return console.error(err);
     res.json({"messages": messages});
+  });
+});
+
+app.delete('/todo', require('connect-ensure-login').ensureLoggedIn(), function(req, res) {
+  Todo.remove({_id: req.body.id}, function(err) {
+    if (err)
+      res.send(500);
+    else 
+      res.send(200);
+  });
+});
+
+app.put('/todo', require('connect-ensure-login').ensureLoggedIn(), function(req, res) {
+  Todo.update({_id: req.body.id}, {message: req.body.message, timestamp: new Date()}, function(err) {
+    if (err)
+      res.send(500);
+    else
+      res.send(200);
+  });
+});
+
+app.put('/checkTodo', require('connect-ensure-login').ensureLoggedIn(), function(req, res) {
+  Todo.update({_id: req.body.id}, {completed: req.body.completed}, function(err) {
+    if (err)
+      res.send(500);
+    else
+      res.send(200);
   });
 });
 

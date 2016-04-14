@@ -206,80 +206,16 @@
 				<div class="panel panel-blue">
 					<div class="panel-heading dark-overlay"><svg class="glyph stroked clipboard-with-paper"><use xlink:href="#stroked-clipboard-with-paper"></use></svg>To-do List</div>
 					<div class="panel-body">
-						<ul class="todo-list">
-						<li class="todo-list-item">
-								<div class="checkbox">
-									<input type="checkbox" id="checkbox" />
-									<label for="checkbox">Make a plan for today</label>
-								</div>
-								<div class="pull-right action-buttons">
-									<a href="#"><svg class="glyph stroked pencil"><use xlink:href="#stroked-pencil"></use></svg></a>
-									<a href="#" class="flag"><svg class="glyph stroked flag"><use xlink:href="#stroked-flag"></use></svg></a>
-									<a href="#" class="trash"><svg class="glyph stroked trash"><use xlink:href="#stroked-trash"></use></svg></a>
-								</div>
-							</li>
-							<li class="todo-list-item">
-								<div class="checkbox">
-									<input type="checkbox" id="checkbox" />
-									<label for="checkbox">Update Basecamp</label>
-								</div>
-								<div class="pull-right action-buttons">
-									<a href="#"><svg class="glyph stroked pencil"><use xlink:href="#stroked-pencil"></use></svg></a>
-									<a href="#" class="flag"><svg class="glyph stroked flag"><use xlink:href="#stroked-flag"></use></svg></a>
-									<a href="#" class="trash"><svg class="glyph stroked trash"><use xlink:href="#stroked-trash"></use></svg></a>
-								</div>
-							</li>
-							<li class="todo-list-item">
-								<div class="checkbox">
-									<input type="checkbox" id="checkbox" />
-									<label for="checkbox">Send email to Jane</label>
-								</div>
-								<div class="pull-right action-buttons">
-									<a href="#"><svg class="glyph stroked pencil"><use xlink:href="#stroked-pencil"></use></svg></a>
-									<a href="#" class="flag"><svg class="glyph stroked flag"><use xlink:href="#stroked-flag"></use></svg></a>
-									<a href="#" class="trash"><svg class="glyph stroked trash"><use xlink:href="#stroked-trash"></use></svg></a>
-								</div>
-							</li>
-							<li class="todo-list-item">
-								<div class="checkbox">
-									<input type="checkbox" id="checkbox" />
-									<label for="checkbox">Drink coffee</label>
-								</div>
-								<div class="pull-right action-buttons">
-									<a href="#"><svg class="glyph stroked pencil"><use xlink:href="#stroked-pencil"></use></svg></a>
-									<a href="#" class="flag"><svg class="glyph stroked flag"><use xlink:href="#stroked-flag"></use></svg></a>
-									<a href="#" class="trash"><svg class="glyph stroked trash"><use xlink:href="#stroked-trash"></use></svg></a>
-								</div>
-							</li>
-							<li class="todo-list-item">
-								<div class="checkbox">
-									<input type="checkbox" id="checkbox" />
-									<label for="checkbox">Do some work</label>
-								</div>
-								<div class="pull-right action-buttons">
-									<a href="#"><svg class="glyph stroked pencil"><use xlink:href="#stroked-pencil"></use></svg></a>
-									<a href="#" class="flag"><svg class="glyph stroked flag"><use xlink:href="#stroked-flag"></use></svg></a>
-									<a href="#" class="trash"><svg class="glyph stroked trash"><use xlink:href="#stroked-trash"></use></svg></a>
-								</div>
-							</li>
-							<li class="todo-list-item">
-								<div class="checkbox">
-									<input type="checkbox" id="checkbox" />
-									<label for="checkbox">Tidy up workspace</label>
-								</div>
-								<div class="pull-right action-buttons">
-									<a href="#"><svg class="glyph stroked pencil"><use xlink:href="#stroked-pencil"></use></svg></a>
-									<a href="#" class="flag"><svg class="glyph stroked flag"><use xlink:href="#stroked-flag"></use></svg></a>
-									<a href="#" class="trash"><svg class="glyph stroked trash"><use xlink:href="#stroked-trash"></use></svg></a>
-								</div>
-							</li>
+						<ul class="todo-list" id="todos">
+
+							
 						</ul>
 					</div>
 					<div class="panel-footer">
 						<div class="input-group">
-							<input id="btn-input" type="text" class="form-control input-md" placeholder="Add new task" />
+							<input id="todo-input" type="text" class="form-control input-md" placeholder="Add new task" />
 							<span class="input-group-btn">
-								<button class="btn btn-primary btn-md" id="btn-todo">Add</button>
+								<button class="btn btn-primary btn-md" id="todo-btn">Add</button>
 							</span>
 						</div>
 					</div>
@@ -312,10 +248,40 @@
 		{{/for}}
 	</script>
 
-	<script>
-		$('#calendar').datepicker({
-		});
+	<script id="todoTemplate" type="text/x-jsrender">
+		{{if todos.length === 0}}
+			<li class="todo-list-item"><span class="text-center">None!</span></li>
+		{{/if}}
+		{{for todos}}
+		<li data-id={{>_id}} id={{>_id}} class="todo-list-item">
+			<div class="checkbox">
+				{{if completed == true}}
+				<input type="checkbox" data-id={{>_id}} id="checkbox" class="todo-checkbox" checked />
+				{{else completed == false}}
+				<input type="checkbox" data-id={{>_id}} id="checkbox" class="todo-checkbox" />
+				{{/if}}
+				<label id={{>"todo-message-"+_id}} for="checkbox">{{:message}}</label>
+			</div>
+			<div class="pull-right action-buttons">
+				<a href="" data-id={{>_id}} class="edit-btn"><svg class="glyph stroked pencil"><use xlink:href="#stroked-pencil"></use></svg></a>
+				<a href="" data-id={{>_id}} class="trash trash-btn"><svg class="glyph stroked trash"><use xlink:href="#stroked-trash"></use></svg></a>
+			</div>
+		</li>
+		{{/for}}
+	</script>
 
+	<script id="todoEditTemplate" type="text/x-jsrender">
+		<li data-id={{>_id}} id={{>_id}} class="todo-list-item">
+			<div class="input-group">
+				<input type="text" data-id={{>_id}} id={{>"edit-todo-"+_id}} class="form-control input-md" value='{{>message}}'></input>
+				<span class="input-group-btn">
+					<button data-id={{>_id}} class="btn btn-success btn-md todo-edit-btn">Update</button>
+				</span>
+			</div>
+		</li>
+	</script>
+
+	<script>
 		var dat = <%- JSON.stringify(data) %>
 		var xDat1 = dat.createdDatesSorted;
 		var yDat1 = [];
@@ -375,6 +341,58 @@
 
 		}
 
+		function initTodoListeners(data) {
+			$('.edit-btn').click(function(ev) {
+				ev.preventDefault();
+				var dat = {};
+				dat._id = $(this).data('id');
+				dat.message = $("#todo-message-" + $(this).data('id')).html();
+				var tmpl = $.templates('#todoEditTemplate');
+				var html = tmpl.render(dat);
+				console.log(dat);
+				$("li#" + $(this).data('id')).html(html);
+				$('.todo-edit-btn').click(function(ev) {
+					ev.preventDefault();
+					$.put('/todo', {id: $(this).data('id'), message: $('#edit-todo-' + $(this).data('id')).val()}, function(err) {
+						$.get('/todos', function(data) {
+							var tmpl = $.templates("#todoTemplate");
+							var html = tmpl.render(data);
+							window._todoData = data;
+							$("#todos").html(html);
+							initTodoListeners(data);
+						});
+					});
+				});
+			});
+			
+			$('.trash-btn').click(function(ev) {
+				ev.preventDefault();
+				$.delete('/todo', {id: $(this).data('id')}, function(res) {
+					$.get('/todos', function(data) {
+						var tmpl = $.templates("#todoTemplate");
+						var html = tmpl.render(data);
+						window._todoData = data;
+						$("#todos").html(html);
+						initTodoListeners(data);
+					});
+				});
+			});
+
+			$('.todo-checkbox').click(function(ev) {
+				var checked = $(this).is(":checked");
+				$.put('/checkTodo', {id: $(this).data('id'), completed: checked}, function(res) {
+					$.get('/todos', function(data) {
+						var tmpl = $.templates("#todoTemplate");
+						var html = tmpl.render(data);
+						window._todoData = data;
+						$("#todos").html(html);
+						initTodoListeners(data);
+					});
+				});
+			});
+
+		}
+
 		window.onload = function(){
 			var chart1 = document.getElementById("line-chart").getContext("2d");
 			window.myLine = new Chart(chart1).Line(lineChartData, {
@@ -401,11 +419,39 @@
 				$.get('/chatMessages', function(data) {
 					var tmpl = $.templates("#chatTemplate");
 					var html = tmpl.render(data);
+					window._messagesLength = data.length;
 					$("#chatMessages").html(html);
 				});
+				$("#chat-input").val('');
 			});
 		});
+
+		$('#todo-btn').click(function(el, ev) {
+			$.post('/addTodo', {message: $("#todo-input").val()}, function(res) {
+				$.get('/todos', function(data) {
+					var tmpl = $.templates("#todoTemplate");
+					var html = tmpl.render(data);
+					window._todoData = data;
+					$("#todos").html(html);
+					initTodoListeners(data);
+				});
+				$("#todo-input").val('');
+			});
+		});
+
+		$('#chat-input').bind("keypress", function(ev) {
+			if (ev.which === 13)
+				$('#chat-btn').click();
+		});
+
+		$('#todo-input').bind("keypress", function(ev) {
+			if (ev.which === 13)
+				$("#todo-btn").click();
+		});
+
 		window._messagesLength = 0;
+		window._todosLength = 0;
+
 		$(document).ready(function() {
 			$.get('/chatMessages', function(data) {
 				var tmpl = $.templates("#chatTemplate");
@@ -413,18 +459,60 @@
 				window._messagesLength = data.messages.length;
 				$("#chatMessages").html(html);
 			});
-		});
-		window.setInterval(function() {
-				$.get('/chatMessages', function(data) {
 
-					if (data.messages.length !== window._messagesLength) {
-						var tmpl = $.templates("#chatTemplate");
-						var html = tmpl.render(data);
-						window._messagesLength = data.messages.length;
-						$("#chatMessages").html(html);
-					}
-				});
-			}, 3000);
+			$.get('/todos', function(data) {
+				var tmpl = $.templates("#todoTemplate");
+				var html = tmpl.render(data);
+				window._todoData = data;
+				$("#todos").html(html);
+				initTodoListeners(data);
+			});
+		});
+
+		window._todoData = {};
+		window._chatData = {};
+
+		window.setInterval(function() {
+			$.get('/chatMessages', function(data) {
+				if (data.messages.length !== window._messagesLength) {
+					var tmpl = $.templates("#chatTemplate");
+					var html = tmpl.render(data);
+					window._messagesLength = data.messages.length;
+					$("#chatMessages").html(html);
+				}
+			});
+
+			$.get('/todos', function(data) {
+				if (data !== window._todoData) {
+					var tmpl = $.templates("#todoTemplate");
+					var html = tmpl.render(data);
+					window._todoData = data;
+					$("#todos").html(html);
+					initTodoListeners(data);
+				}
+			});
+		}, 5000);
+		
+
+		jQuery.each( [ "put", "delete" ], function( i, method ) {
+		  jQuery[ method ] = function( url, data, callback, type ) {
+		    if ( jQuery.isFunction( data ) ) {
+		      type = type || callback;
+		      callback = data;
+		      data = undefined;
+		    }
+
+		    return jQuery.ajax({
+		      url: url,
+		      type: method,
+		      dataType: type,
+		      data: data,
+		      success: callback
+		    });
+		  };
+		});
+
+		$()
 	</script>	
 </body>
 
