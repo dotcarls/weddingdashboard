@@ -15,6 +15,10 @@ const http         = require('http'),
       moment       = require('moment'),
       mongoose     = require('mongoose');
 
+
+//////////////////////////
+// Parse Initialization //
+//////////////////////////
 var options = {
   app_id: ***REMOVED***,
   api_key: ***REMOVED***
@@ -22,6 +26,10 @@ var options = {
 
 var parse = new Parse(options);
 
+
+/////////////////////////////
+// Passport Initialization //
+/////////////////////////////
 passport.use(new Strategy(
   function(username, password, cb) {
     auth.users.findByUsername(username, function(err, user) {
@@ -44,7 +52,12 @@ passport.deserializeUser(function(id, cb) {
   });
 });
 
+
+/////////////////////////////////////
+// MongoDB Connection via Mongoose //
+/////////////////////////////////////
 var connection_string = '127.0.0.1:27017/weddingdashboard';
+
 // if OPENSHIFT env variables are present, use the available connection info:
 if(process.env.OPENSHIFT_MONGODB_DB_PASSWORD){
   connection_string = process.env.OPENSHIFT_MONGODB_DB_USERNAME + ":" +
@@ -56,6 +69,10 @@ if(process.env.OPENSHIFT_MONGODB_DB_PASSWORD){
 
 mongoose.connect('mongodb://' + connection_string);
 
+
+////////////
+// Models //
+////////////
 const ChatMessage = mongoose.model('ChatMessage', {
   user: Object,
   timestamp: Date, 
@@ -68,6 +85,10 @@ const Todo = mongoose.model('Todo', {
   completed: Boolean
 });
 
+
+////////////////////////////
+// Express Initialization //
+////////////////////////////
 const app = express();
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
@@ -83,6 +104,10 @@ app.get('/health', function(req, res) {
   res.status(200).send(200);
 });
 
+
+////////////
+// Routes //
+////////////
 app.get('/', require('connect-ensure-login').ensureLoggedIn(), function(req, res) {
   var data = {};
   data.individualCount = 0;
@@ -111,17 +136,10 @@ app.get('/', require('connect-ensure-login').ensureLoggedIn(), function(req, res
   parse.find('Rsvp', '', function(err, response) {
 
     if (err) {
-      // console.log("#### ERROR ####");
-      // console.log(err);
+      console.log("#### ERROR ####");
+      console.log(err);
     } else {
-      // console.log("Success!");
       data.results = response.results;
-
-      
-      // console.log(JSON.stringify(response));
-      
-      // console.log("Processing " + response.results.length + " records.");
-      
       response.results.forEach(function(result) {
         data.total++;
 
@@ -133,11 +151,13 @@ app.get('/', require('connect-ensure-login').ensureLoggedIn(), function(req, res
         var rsvpName = "RSVP " + data.total;
 
         if (result.attending) { 
+          // If they're attending and have thier name filled out correctly
           if (result.attendees[0].firstName !== "")
             rsvpName = result.attendees[0].firstName + " " + result.attendees[0].lastName;
 
           data.rsvps[rsvpName] = result;
 
+          // Process RSVP Attendees
           result.attendees.forEach(function(attendee) {
             data.attendeesFlat[attendee.firstName + " " + attendee.lastName] = attendee;
 
@@ -150,9 +170,12 @@ app.get('/', require('connect-ensure-login').ensureLoggedIn(), function(req, res
 
           data.attending++;
 
+          // Count hotel request
           if (result.hotel.needsReservation)
             data.roomCount += parseInt(result.hotel.numberOfRooms);
+
         } else { 
+          // Not attending, if they have name filled out correctly set name
           if (result.notAttendingName)
             rsvpName = result.notAttendingName;
           
@@ -165,26 +188,23 @@ app.get('/', require('connect-ensure-login').ensureLoggedIn(), function(req, res
           data.comments.push({rsvpName: rsvpName, comment: result.comment})
         }
 
+        // Store creation data by date
         data.createdDatesTotalAttendees[createdAt] = data.individualCount;
         data.createdDatesTotalRsvps[createdAt] = data.total;
       });
 
-      // console.log("Total Attendees: " + data.individualCount);
-      // console.log("RSVPs declined: " + data.notAttending);
-      // console.log("Rooms needed: " + data.roomCount);
-
-      // console.log("Found " + Object.keys(data.createdDates).length + " unique dates.")
+      // Find most submissions by day
       var topSubmissionsDateCount = 0;
       var topSubmissionsDate = "";
 
       Object.keys(data.createdDates).forEach(function(date) {
         if (data.createdDates[date] > topSubmissionsDateCount) {
-          topSubmissionsDateCount = data.createdDates[date];
-          topSubmissionsDate = date;
+          data.topSubmissionsDateCount = data.createdDates[date];
+          data.topSubmissionsDate = date;
         }
       });
 
-      // console.log("Most submissions on " + topSubmissionsDate + " with " + topSubmissionsDateCount + " submissions.");
+      // Sort the dates / submissions data to make sure they're in order
       data.createdDatesSorted = Object.keys(data.createdDates);
       data.createdDatesSorted.sort(function(a, b) {
         var mA = moment(a, "M/D/YY");
@@ -197,22 +217,34 @@ app.get('/', require('connect-ensure-login').ensureLoggedIn(), function(req, res
         return 0;       
       }); 
     }
-    // console.log(data);
-    res.render('home', {user: req.user, data: data});
+    
+    // Send the data
+    res.render('home', {user: req.user, data: data, dashboardIsActive: true});
   });
 });
 
+
+///////////////////////////
+// Login / Logout Routes //
+///////////////////////////
 app.get('/login', function(req, res) {
   res.render('login');
 });
 
 app.post('/login', passport.authenticate('local', {failureRedirect: '/login'}), function(req, res) {
-  // console.log(req);
   res.redirect('/');
 });
 
-app.post('/addComment', require('connect-ensure-login').ensureLoggedIn(), function(req, res) {
-  // console.log(req);
+app.get('/logout', function(req, res) {
+  req.logout();
+  res.redirect('/');
+});
+
+
+/////////////////
+// Chat Routes //
+/////////////////
+app.post('/addChat', require('connect-ensure-login').ensureLoggedIn(), function(req, res) {
   var message = new ChatMessage({user: req.user, message: req.body.message, timestamp: new Date()});
   message.save(function(err) {
     if (err) 
@@ -222,6 +254,17 @@ app.post('/addComment', require('connect-ensure-login').ensureLoggedIn(), functi
   });
 });
 
+app.get('/chatMessages', require('connect-ensure-login').ensureLoggedIn(), function(req, res) {
+  ChatMessage.find({}).sort({timestamp: -1}).limit(25).exec(function(err, messages) {
+    if (err) return console.error(err);
+    res.json({"messages": messages});
+  });
+});
+
+
+/////////////////
+// Todo Routes //
+/////////////////
 app.post('/addTodo', require('connect-ensure-login').ensureLoggedIn(), function(req, res) {
   var todo = new Todo({timestamp: new Date(), completed: false, message: req.body.message});
   todo.save(function(err) {
@@ -236,13 +279,6 @@ app.get('/todos', require('connect-ensure-login').ensureLoggedIn(), function(req
   Todo.find({}).sort({timestamp: -1}).exec(function(err, todos) {
     if (err) return console.error(err);
     res.json({"todos": todos});
-  });
-});
-
-app.get('/chatMessages', require('connect-ensure-login').ensureLoggedIn(), function(req, res) {
-  ChatMessage.find({}).sort({timestamp: -1}).limit(25).exec(function(err, messages) {
-    if (err) return console.error(err);
-    res.json({"messages": messages});
   });
 });
 
@@ -273,16 +309,136 @@ app.put('/checkTodo', require('connect-ensure-login').ensureLoggedIn(), function
   });
 });
 
-app.get('/logout', function(req, res) {
-  req.logout();
-  res.redirect('/');
+
+///////////////////////////////
+// RSVP Comments Page Routes //
+///////////////////////////////
+app.get('/comments', require('connect-ensure-login').ensureLoggedIn(), function(req, res) {
+  var data = {};
+  parse.find('Rsvp', '', function(err, response) {
+    res.render('comments', {user: req.user});
+  });
 });
 
-app.get('/profile', require('connect-ensure-login').ensureLoggedIn(), function(req, res) {
-  res.render('profile', {user: req.user});
+
+////////////////////////
+// RSVP Overview Page //
+////////////////////////
+app.get('/rsvps', require('connect-ensure-login').ensureLoggedIn(), function(req, res) {
+  var data = {};
+  data.individualCount = 0;
+  data.attending = 0;
+  data.total = 0;
+  data.notAttending = 0;
+  data.foodCounts = {};
+  data.foodCounts["schnitzel"] = 0;
+  data.foodCounts["fish"] = 0;
+  data.foodCounts["chicken"] = 0;
+  data.updatedDates = {};
+  data.createdDates = {};
+  data.updatedDatesSorted = [];
+  data.createdDatesSorted = [];
+  data.createdDatesAttendeesCount = {};
+  data.createdDatesTotalAttendees = {};
+  data.createdDatesTotalRsvps = {};
+  data.results = [];
+  data.rsvps = {};
+  data.notAttendees = {};
+  data.attendeesFlat = {};
+  data.roomCount = 0;
+  data.commentCount = 0;
+  data.comments = [];
+
+  parse.find('Rsvp', '', function(err, response) {
+    if (err) {
+      console.log("#### ERROR ####");
+      console.log(err);
+    } else {
+      data.results = response.results;
+      response.results.forEach(function(result) {
+        data.total++;
+
+        var updatedAt = moment(result.updatedAt).format("M/D/YY");
+        var createdAt = moment(result.createdAt).format("M/D/YY");
+        _.has(data.updatedDates, updatedAt) ? data.updatedDates[updatedAt] += 1 : data.updatedDates[updatedAt] = 1;
+        _.has(data.createdDates, createdAt) ? data.createdDates[createdAt] += 1 : data.createdDates[createdAt] = 1;
+
+        var rsvpName = "RSVP " + data.total;
+
+        if (result.attending) { 
+          // If they're attending and have thier name filled out correctly
+          if (result.attendees[0].firstName !== "")
+            rsvpName = result.attendees[0].firstName + " " + result.attendees[0].lastName;
+
+          data.rsvps[rsvpName] = result;
+
+          // Process RSVP Attendees
+          result.attendees.forEach(function(attendee) {
+            data.attendeesFlat[attendee.firstName + " " + attendee.lastName] = attendee;
+
+            if (attendee.food)
+              data.foodCounts[attendee.food]++;
+
+            data.individualCount++;
+            _.has(data.createdDatesAttendeesCount, createdAt) ? data.createdDatesAttendeesCount[createdAt] += 1 : data.createdDatesAttendeesCount[createdAt] = 1;
+          });
+
+          data.attending++;
+
+          // Count hotel request
+          if (result.hotel.needsReservation)
+            data.roomCount += parseInt(result.hotel.numberOfRooms);
+
+        } else { 
+          // Not attending, if they have name filled out correctly set name
+          if (result.notAttendingName)
+            rsvpName = result.notAttendingName;
+          
+          data.notAttendees[rsvpName] = result;
+          data.notAttending++;
+        }
+
+        if (result.comment) {
+          data.commentCount++;
+          data.comments.push({rsvpName: rsvpName, comment: result.comment})
+        }
+
+        // Store creation data by date
+        data.createdDatesTotalAttendees[createdAt] = data.individualCount;
+        data.createdDatesTotalRsvps[createdAt] = data.total;
+      });
+
+      // Find most submissions by day
+      var topSubmissionsDateCount = 0;
+      var topSubmissionsDate = "";
+
+      Object.keys(data.createdDates).forEach(function(date) {
+        if (data.createdDates[date] > topSubmissionsDateCount) {
+          data.topSubmissionsDateCount = data.createdDates[date];
+          data.topSubmissionsDate = date;
+        }
+      });
+
+      // Sort the dates / submissions data to make sure they're in order
+      data.createdDatesSorted = Object.keys(data.createdDates);
+      data.createdDatesSorted.sort(function(a, b) {
+        var mA = moment(a, "M/D/YY");
+        var mB = moment(b, "M/D/YY");
+
+        if (mA.isBefore(mB))
+          return -1;
+        if (mB.isBefore(mA))
+          return 1;
+        return 0;       
+      }); 
+    }
+
+    res.render('rsvps', {user: req.user, data: data});
+  });
 });
 
 
+// Yay we're done
 app.listen(env.NODE_PORT || 3000, env.NODE_IP || 'localhost', function () {
   console.log(`Application worker ${process.pid} started...`);
 });
