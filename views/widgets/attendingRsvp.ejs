@@ -1,0 +1,15 @@
+<% 	var str = "";
+	rsvp.attendees.forEach(function(attendee) { 
+		str += attendee.firstName + " " + attendee.lastName + " ";
+	});
+%>
+<div class="col-md-6">
+	<div class="panel panel-success">
+		<div class="panel-heading">
+			<%= str %>
+		</div>
+		<div class="panel-body">
+			<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque ut ante in sapien blandit luctus sed ut lacus. Phasellus urna est, faucibus nec ultrices placerat, feugiat et ligula. Donec vestibulum magna a dui pharetra molestie. Fusce et dui urna.</p>
+		</div>
+	</div>
+</div>

@@ -1,0 +1,36 @@
+<div class="col-xs-6 col-md-3">
+	<div class="panel panel-default">
+		<div class="panel-body easypiechart-panel">
+			<h4>RSVPs Accepted</h4>
+			<div class="easypiechart" id="easypiechart-blue" data-percent="<%= Math.round(data.attending / (data.attending + data.notAttending)*100) %>" ><span class="percent"><%= Math.round(data.attending / (data.attending + data.notAttending)*100) %>%</span>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="col-xs-6 col-md-3">
+	<div class="panel panel-default">
+		<div class="panel-body easypiechart-panel">
+			<h4>Comments Replied To</h4>
+			<div class="easypiechart" id="easypiechart-orange" data-percent="100" ><span class="percent">100%</span>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="col-xs-6 col-md-3">
+	<div class="panel panel-default">
+		<div class="panel-body easypiechart-panel">
+			<h4>Estimated Attendence</h4>
+			<div class="easypiechart" id="easypiechart-teal" data-percent="<%= Math.round(data.attending/140*100) %>" ><span class="percent"><%= Math.round((data.individualCount/140)*100) %>%</span>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="col-xs-6 col-md-3">
+	<div class="panel panel-default">
+		<div class="panel-body easypiechart-panel">
+			<h4>Estimated Rooms</h4>
+			<div class="easypiechart" id="easypiechart-red" data-percent="<%= Math.round(data.roomCount/20*100) %>" ><span class="percent"><%= Math.round(data.roomCount/20*100) %>%</span>
+			</div>
+		</div>
+	</div>
+</div>

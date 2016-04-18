@@ -1,0 +1,79 @@
+<div class="col-lg-12">
+	<div class="panel panel-default">
+		<div class="panel-heading">RSVP Response Overview</div>
+		<div class="panel-body">
+			<div class="canvas-wrapper">
+				<canvas class="main-chart" id="line-chart" height="200" width="600"></canvas>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+	var dat = <%- JSON.stringify(data) %>
+	var xDat1 = dat.createdDatesSorted;
+	var yDat1 = [];
+
+	xDat1.forEach(function(x) {
+		yDat1.push(dat.createdDates[x]);
+	});
+
+	var xDat2 = dat.createdDatesSorted;
+	var yDat2 = [];
+
+	xDat2.forEach(function(x) {
+		yDat2.push(dat.createdDatesTotalRsvps[x]);
+	});
+
+	var xDat3 = dat.createdDatesSorted;
+	var yDat3 = [];
+
+	xDat3.forEach(function(x) {
+		yDat3.push(dat.createdDatesTotalAttendees[x]);
+	});
+
+	var lineChartData = {
+		labels : xDat1,
+		datasets : [
+			{
+				label: "Daily RSVPs",
+				fillColor : "rgba(220,220,220,0.2)",
+				strokeColor : "rgba(220,220,220,1)",
+				pointColor : "rgba(220,220,220,1)",
+				pointStrokeColor : "#fff",
+				pointHighlightFill : "#fff",
+				pointHighlightStroke : "rgba(220,220,220,1)",
+				data : yDat1
+			},
+			{
+				label: "Total RSVPs",
+				fillColor : "rgba(48, 164, 255, 0.2)",
+				strokeColor : "rgba(48, 164, 255, 1)",
+				pointColor : "rgba(48, 164, 255, 1)",
+				pointStrokeColor : "#fff",
+				pointHighlightFill : "#fff",
+				pointHighlightStroke : "rgba(48, 164, 255, 1)",
+				data : yDat2
+			},
+			{
+				label: "Total Attendees",
+				fillColor : "rgba(45, 190, 174, 0.2)",
+				strokeColor : "rgba(45, 190, 174, 1)",
+				pointColor : "rgba(45, 190, 174, 1)",
+				pointStrokeColor : "#fff",
+				pointHighlightFill : "#fff",
+				pointHighlightStroke : "rgba(45, 190, 174, 1)",
+				data : yDat3
+			}
+		]
+
+	}
+
+	
+	window.onload = function(){
+		var chart1 = document.getElementById("line-chart").getContext("2d");
+		window.myLine = new Chart(chart1).Line(lineChartData, {
+			responsive: true
+		});
+	};
+</script>

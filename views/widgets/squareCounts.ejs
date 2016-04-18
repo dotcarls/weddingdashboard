@@ -1,0 +1,52 @@
+<div class="col-xs-12 col-md-6 col-lg-3">
+	<div class="panel panel-blue panel-widget ">
+		<div class="row no-padding">
+			<div class="col-sm-3 col-lg-5 widget-left">
+				<svg class="glyph stroked open letter"><use xlink:href="#stroked-open-letter"></use></svg>
+			</div>
+			<div class="col-sm-9 col-lg-7 widget-right">
+				<div class="large"><%= data.attending %> / <%= data.attending + data.notAttending %></div>
+				<div class="text-muted">RSVPs</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="col-xs-12 col-md-6 col-lg-3">
+	<div class="panel panel-orange panel-widget">
+		<div class="row no-padding">
+			<div class="col-sm-3 col-lg-5 widget-left">
+				<svg class="glyph stroked empty-message"><use xlink:href="#stroked-empty-message"></use></svg>
+			</div>
+			<div class="col-sm-9 col-lg-7 widget-right">
+				<div class="large"><%= data.commentCount %></div>
+				<div class="text-muted">Comments</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="col-xs-12 col-md-6 col-lg-3">
+	<div class="panel panel-teal panel-widget">
+		<div class="row no-padding">
+			<div class="col-sm-3 col-lg-5 widget-left">
+				<svg class="glyph stroked male-user"><use xlink:href="#stroked-male-user"></use></svg>
+			</div>
+			<div class="col-sm-9 col-lg-7 widget-right">
+				<div class="large"><%= data.individualCount %></div>
+				<div class="text-muted">Attendees</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="col-xs-12 col-md-6 col-lg-3">
+	<div class="panel panel-red panel-widget">
+		<div class="row no-padding">
+			<div class="col-sm-3 col-lg-5 widget-left">
+				<svg class="glyph stroked home"><use xlink:href="#stroked-home"></use></svg>
+			</div>
+			<div class="col-sm-9 col-lg-7 widget-right">
+				<div class="large"><%= data.roomCount %></div>
+				<div class="text-muted">Rooms</div>
+			</div>
+		</div>
+	</div>
+</div>

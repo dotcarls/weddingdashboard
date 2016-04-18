@@ -1,0 +1,74 @@
+<div class="col-md-8">
+	<div class="panel panel-default chat">
+		<div class="panel-heading" id="accordion"><svg class="glyph stroked two-messages"><use xlink:href="#stroked-two-messages"></use></svg> Chat</div>
+		<div class="panel-body">
+			<ul id="chatMessages"></ul>
+		</div>
+		
+		<div class="panel-footer">
+			<div class="input-group">
+				<input id="chat-input" type="text" class="form-control input-md" placeholder="Type your message here..." />
+				<span class="input-group-btn">
+					<button class="btn btn-success btn-md" id="chat-btn">Send</button>
+				</span>
+			</div>
+		</div>
+	</div>
+</div><!--/.col-->
+
+<script id="chatTemplate" type="text/x-jsrender">
+	{{for messages}}
+	<li class="left clearfix">
+		<span class="chat-img pull-left">
+			<img src={{>"/" + user.icon}} alt="User Avatar" class="img-circle" />
+		</span>
+		<div class="chat-body clearfix">
+			<div class="header">
+				<strong class="primary-font">{{:user.displayName}}</strong> <small class="text-muted">{{:timestamp}}</small>
+			</div>
+			<p>{{:message}}</p>
+		</div>
+	</li>
+	{{/for}}
+</script>
+
+<script>
+	window._chatData = {};
+
+	$('#chat-btn').click(function(el,ev) {
+		$.post('/addChat', {message: $('#chat-input').val()}, function(res) {
+			$.get('/chatMessages', function(data) {
+				var tmpl = $.templates("#chatTemplate");
+				var html = tmpl.render(data);
+				window._messagesLength = data.length;
+				$("#chatMessages").html(html);
+			});
+			$("#chat-input").val('');
+		});
+	});
+
+	$('#chat-input').bind("keypress", function(ev) {
+		if (ev.which === 13)
+			$('#chat-btn').click();
+	});
+
+	$(document).ready(function() {
+		$.get('/chatMessages', function(data) {
+			var tmpl = $.templates("#chatTemplate");
+			var html = tmpl.render(data);
+			window._messagesLength = data.messages.length;
+			$("#chatMessages").html(html);
+		});
+	});
+	
+	window.setInterval(function() {
+		$.get('/chatMessages', function(data) {
+			if (data.messages.length !== window._messagesLength) {
+				var tmpl = $.templates("#chatTemplate");
+				var html = tmpl.render(data);
+				window._messagesLength = data.messages.length;
+				$("#chatMessages").html(html);
+			}
+		});
+	}, 5000);
+</script>
