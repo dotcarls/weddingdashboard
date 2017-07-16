@@ -20,8 +20,8 @@ const http         = require('http'),
 // Parse Initialization //
 //////////////////////////
 var options = {
-  app_id: ***REMOVED***,
-  api_key: ***REMOVED***
+  app_id: "PARSE-CREDS-HERE",
+  api_key: "PARSE-CREDS-HERE"
 };
 
 var parse = new Parse(options);
